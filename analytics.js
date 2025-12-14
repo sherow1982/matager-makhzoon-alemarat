@@ -1,16 +1,21 @@
 // ==========================================
-// ملف التحليلات المحسن (Lazy Loading)
+// ملف التحليلات المحسن (Lazy Loading - Ultra Fast)
 // ==========================================
 
 (function() {
-    // دالة لتهيئة التحليلات (تعمل مرة واحدة فقط)
+    // متغير لمنع تحميل الأكواد أكثر من مرة
     var analyticsInited = false;
 
     function initAnalytics() {
         if (analyticsInited) return;
         analyticsInited = true;
 
-        console.log("Loading Analytics & GTM...");
+        // إزالة مستمعي الأحداث لتخفيف العبء عن المتصفح بمجرد التحميل
+        document.removeEventListener('mousemove', initAnalytics);
+        document.removeEventListener('touchstart', initAnalytics);
+        document.removeEventListener('scroll', initAnalytics);
+
+        console.log("🚀 Analytics Loaded Asynchronously");
 
         // 1. Google Analytics (GA4) - G-WSJ062EHKM
         const gaScript = document.createElement('script');
@@ -31,15 +36,22 @@
         })(window,document,'script','dataLayer','GTM-NWQ5HX32');
     }
 
-    // الانتظار حتى يتم تحميل الصفحة بالكامل
-    window.addEventListener('load', function() {
-        // تأخير التشغيل لمدة 3.5 ثانية لإعطاء الأولوية لصور الموقع والمنتجات
-        setTimeout(initAnalytics, 3500);
-    });
+    // الطريقة الذكية: انتظر حتى ترتاح الصفحة تماماً (Idle) ثم حمل الأكواد
+    if (window.requestIdleCallback) {
+        window.requestIdleCallback(function() {
+            setTimeout(initAnalytics, 3000); // تأخير بسيط إضافي للأمان
+        });
+    } else {
+        // للمتصفحات القديمة: استخدم التايمر العادي
+        window.addEventListener('load', function() {
+            setTimeout(initAnalytics, 3500);
+        });
+    }
 
-    // أو التشغيل فوراً إذا بدأ المستخدم في تحريك الماوس أو اللمس (لضمان تسجيل البيانات)
-    document.addEventListener('mousemove', initAnalytics);
-    document.addEventListener('touchstart', initAnalytics);
-    document.addEventListener('scroll', initAnalytics);
+    // التشغيل الفوري عند أول تفاعل من المستخدم (لضمان عدم ضياع الزيارة)
+    // نستخدم {passive: true} لتحسين أداء السكرول
+    document.addEventListener('mousemove', initAnalytics, {passive: true});
+    document.addEventListener('touchstart', initAnalytics, {passive: true});
+    document.addEventListener('scroll', initAnalytics, {passive: true});
 
 })();
