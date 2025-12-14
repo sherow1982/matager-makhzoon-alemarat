@@ -3,83 +3,144 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>إتمام الطلب - مخزون الإمارات</title>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <title>إتمام الطلب الآمن - مخزون الإمارات</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
 </head>
-<body>
+<body class="checkout-page-body">
 
-    <header class="main-header" style="text-align: center;">
+    <!-- هيدر مبسط للدفع -->
+    <header class="checkout-header">
         <div class="container">
-            <a href="index.html" class="logo">
+            <a href="../index.html" class="logo">
                 <span class="uae-red">مخزون</span> <span class="uae-green">الإمارات</span>
             </a>
+            <div class="secure-badge"><i class="fas fa-lock"></i> دفع آمن 100%</div>
         </div>
     </header>
 
-    <div class="container" style="margin-top: 40px; margin-bottom: 40px;">
-        <div class="checkout-grid">
+    <div class="container">
+        <!-- شريط الخطوات -->
+        <div class="checkout-steps">
+            <div class="step completed">
+                <div class="step-icon"><i class="fas fa-shopping-cart"></i></div>
+                <span>السلة</span>
+            </div>
+            <div class="step active">
+                <div class="step-icon"><i class="fas fa-map-marker-alt"></i></div>
+                <span>العنوان</span>
+            </div>
+            <div class="step">
+                <div class="step-icon"><i class="fas fa-check"></i></div>
+                <span>التأكيد</span>
+            </div>
+            <div class="line"></div>
+        </div>
+
+        <div class="checkout-layout">
             
-            <!-- نموذج البيانات -->
-            <div class="checkout-form-section">
-                <h2 class="section-title"><i class="fas fa-map-marker-alt"></i> عنوان الشحن</h2>
-                <form id="checkout-form" onsubmit="processOrder(event)">
-                    <div class="form-group">
-                        <label>الاسم الكامل</label>
-                        <input type="text" id="c_name" required placeholder="مثال: محمد أحمد">
-                    </div>
-                    <div class="form-group">
-                        <label>رقم الهاتف (واتساب)</label>
-                        <input type="tel" id="c_phone" required placeholder="050xxxxxxx">
-                    </div>
-                    <div class="form-group">
-                        <label>الإمارة / المدينة</label>
-                        <select id="c_city" required>
-                            <option value="">اختر الإمارة...</option>
-                            <option value="أبوظبي">أبوظبي</option>
-                            <option value="دبي">دبي</option>
-                            <option value="الشارقة">الشارقة</option>
-                            <option value="عجمان">عجمان</option>
-                            <option value="أم القيوين">أم القيوين</option>
-                            <option value="رأس الخيمة">رأس الخيمة</option>
-                            <option value="الفجيرة">الفجيرة</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>العنوان التفصيلي</label>
-                        <input type="text" id="c_address" required placeholder="المنطقة، الشارع، رقم الفيلا/الشقة">
-                    </div>
+            <!-- العمود الأيمن: نموذج البيانات -->
+            <div class="checkout-main">
+                <div class="form-card fade-in">
+                    <h2 class="form-title">بيانات التوصيل</h2>
                     
-                    <button type="submit" class="btn-confirm-order">
-                        <i class="fab fa-whatsapp"></i> تأكيد الطلب الآن
-                    </button>
-                    <p class="text-small" style="margin-top: 10px; color: #777;">سيتم تحويلك لواتساب لإرسال تفاصيل الطلب.</p>
-                </form>
+                    <form id="checkout-form" onsubmit="processOrder(event)">
+                        <!-- الاسم -->
+                        <div class="input-group">
+                            <label>الاسم الكامل</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-user"></i>
+                                <input type="text" id="c_name" required placeholder="ادخل اسمك هنا..">
+                            </div>
+                        </div>
+
+                        <!-- الهاتف -->
+                        <div class="input-group">
+                            <label>رقم الهاتف (واتساب)</label>
+                            <div class="input-wrapper">
+                                <i class="fas fa-mobile-alt"></i>
+                                <input type="tel" id="c_phone" required placeholder="05xxxxxxxx">
+                            </div>
+                            <small style="color:#777; font-size:12px; margin-top:5px; display:block">سنرسل لك تفاصيل الطلب عبر واتساب لتأكيده.</small>
+                        </div>
+
+                        <!-- المدينة والعنوان -->
+                        <div class="row-group">
+                            <div class="input-group">
+                                <label>الإمارة</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-map"></i>
+                                    <select id="c_city" required>
+                                        <option value="" disabled selected>اختر الإمارة</option>
+                                        <option value="أبوظبي">أبوظبي</option>
+                                        <option value="دبي">دبي</option>
+                                        <option value="الشارقة">الشارقة</option>
+                                        <option value="عجمان">عجمان</option>
+                                        <option value="أم القيوين">أم القيوين</option>
+                                        <option value="رأس الخيمة">رأس الخيمة</option>
+                                        <option value="الفجيرة">الفجيرة</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="input-group">
+                                <label>المنطقة / العنوان</label>
+                                <div class="input-wrapper">
+                                    <i class="fas fa-home"></i>
+                                    <input type="text" id="c_address" required placeholder="الشارع، رقم المبنى...">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- طريقة الدفع -->
+                        <div class="payment-method-box">
+                            <label class="radio-container">
+                                <input type="radio" checked name="payment" disabled>
+                                <span class="radio-checkmark"></span>
+                                <div class="payment-details">
+                                    <span class="pay-title">الدفع عند الاستلام (COD)</span>
+                                    <span class="pay-desc">ادفع نقداً عند وصول الطلب لباب بيتك.</span>
+                                </div>
+                                <i class="fas fa-money-bill-wave payment-icon"></i>
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn-checkout-submit">
+                            <span>تأكيد الطلب الآن</span>
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="trust-icons">
+                    <div><i class="fas fa-shield-alt"></i> ضمان الجودة</div>
+                    <div><i class="fas fa-sync"></i> استرجاع سهل</div>
+                    <div><i class="fas fa-headset"></i> دعم فني</div>
+                </div>
             </div>
 
-            <!-- ملخص الطلب -->
-            <div class="order-summary-section">
-                <h2 class="section-title"><i class="fas fa-shopping-cart"></i> ملخص الطلب</h2>
-                <div id="checkout-items">
-                    <!-- سيتم تعبئته بالجافاسكربت -->
-                </div>
-                <div class="summary-total">
-                    <div class="flex-between">
-                        <span>المجموع الفرعي:</span>
-                        <span id="sub-total">0.00 درهم</span>
+            <!-- العمود الأيسر: ملخص الطلب -->
+            <div class="checkout-sidebar">
+                <div class="summary-card">
+                    <h3>ملخص الطلب</h3>
+                    <div id="checkout-items" class="summary-items-list">
+                        <!-- سيتم تعبئة المنتجات هنا -->
                     </div>
-                    <div class="flex-between">
-                        <span>الشحن:</span>
-                        <span style="color: var(--uae-green);">مجاني (عرض محدود)</span>
-                    </div>
-                    <div class="divider"></div>
-                    <div class="flex-between total-row">
-                        <span>الإجمالي الكلي:</span>
-                        <span id="final-total">0.00 درهم</span>
-                    </div>
-                    <div class="payment-method">
-                        <i class="fas fa-money-bill-wave"></i> الدفع عند الاستلام
+                    
+                    <div class="summary-totals">
+                        <div class="total-row">
+                            <span>المجموع الفرعي</span>
+                            <span id="sub-total">0.00 درهم</span>
+                        </div>
+                        <div class="total-row">
+                            <span>الشحن</span>
+                            <span style="color:var(--uae-green)">مجاني لفترة محدودة</span>
+                        </div>
+                        <div class="divider"></div>
+                        <div class="total-row final">
+                            <span>الإجمالي الكلي</span>
+                            <span id="final-total">0.00 درهم</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -87,78 +148,29 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
     <script>
-        // كود خاص بصفحة التشيك أوت فقط
-        document.addEventListener('DOMContentLoaded', () => {
-            loadCheckoutItems();
-        });
-
-        function loadCheckoutItems() {
-            let cart = JSON.parse(localStorage.getItem('cart')) || [];
-            if(cart.length === 0) {
-                window.location.href = 'index.html';
-                return;
-            }
-
-            const container = document.getElementById('checkout-items');
-            let total = 0;
-            
-            cart.forEach(item => {
-                total += item.price * item.qty;
-                container.innerHTML += `
-                    <div class="summary-item">
-                        <img src="${item.image}" alt="${item.title}">
-                        <div>
-                            <h4>${item.title}</h4>
-                            <p>${item.qty} x ${item.price} درهم</p>
-                        </div>
-                        <div style="margin-right: auto;">${item.qty * item.price}</div>
-                    </div>
-                `;
-            });
-
-            document.getElementById('sub-total').innerText = total + ' درهم';
-            document.getElementById('final-total').innerText = total + ' درهم';
-        }
-
+        // دالة خاصة بالصفحة (Process Order)
         function processOrder(e) {
             e.preventDefault();
-            
-            // جمع البيانات
             const name = document.getElementById('c_name').value;
             const phone = document.getElementById('c_phone').value;
             const city = document.getElementById('c_city').value;
             const address = document.getElementById('c_address').value;
-            
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
             
-            // تجهيز رسالة الواتساب
-            let msg = `*طلب جديد من مخزون الإمارات*%0a`;
-            msg += `---------------------------%0a`;
-            msg += `👤 *العميل:* ${name}%0a`;
-            msg += `📱 *الهاتف:* ${phone}%0a`;
-            msg += `📍 *العنوان:* ${city} - ${address}%0a`;
-            msg += `---------------------------%0a`;
-            msg += `*الطلبات:*%0a`;
-            
+            let msg = `*طلب جديد (مخزون الإمارات)*%0a`;
+            msg += `👤 الاسم: ${name}%0a📱 الهاتف: ${phone}%0a📍 العنوان: ${city} - ${address}%0a`;
+            msg += `---------------------------%0a*المنتجات:*%0a`;
             let total = 0;
             cart.forEach(item => {
-                msg += `▪️ ${item.title} (x${item.qty}) - ${item.price * item.qty} درهم%0a`;
+                msg += `▪️ ${item.title} (x${item.qty}) - ${item.price * item.qty}%0a`;
                 total += item.price * item.qty;
             });
-            
-            msg += `---------------------------%0a`;
-            msg += `💰 *الإجمالي المستحق:* ${total} درهم%0a`;
-            msg += `📦 الدفع عند الاستلام`;
+            msg += `---------------------------%0a💰 *الإجمالي: ${total} درهم*`;
 
-            // تفريغ السلة
             localStorage.removeItem('cart');
-            
-            // فتح واتساب
             window.open(`https://wa.me/201110760081?text=${msg}`, '_blank');
-            
-            // التحويل لصفحة الشكر
             window.location.href = 'thankyou.html';
         }
     </script>
