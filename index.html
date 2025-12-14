@@ -13,7 +13,6 @@
     <div class="top-bar">
         <div class="container flex-between">
             <div class="contact-info">
-                <!-- روابط الصفحات القانونية في الهيدر -->
                 <a href="pages/terms.html" class="top-link">الشروط والأحكام</a>
                 <span class="sep">|</span>
                 <a href="pages/returns.html" class="top-link">سياسة الاسترجاع</a>
@@ -27,10 +26,13 @@
     <header class="main-header">
         <div class="container flex-between">
             <a href="index.html" class="logo"><span class="uae-red">مخزون</span> <span class="uae-green">الإمارات</span></a>
+            
+            <!-- مربع البحث المعدل -->
             <div class="search-box">
-                <input type="text" placeholder="ابحث عن منتج...">
-                <button><i class="fas fa-search"></i></button>
+                <input type="text" id="search-input" placeholder="ابحث عن منتج..." onkeypress="handleEnter(event)">
+                <button onclick="searchProducts()"><i class="fas fa-search"></i></button>
             </div>
+
             <div class="header-icons">
                 <div class="cart-icon" onclick="toggleCart()">
                     <i class="fas fa-shopping-bag"></i>
@@ -59,7 +61,7 @@
     </div>
     <div class="overlay" id="overlay" onclick="toggleCart()"></div>
 
-    <!-- النافذة المنبثقة (Modal) -->
+    <!-- النافذة المنبثقة -->
     <div id="policyModal" class="modal-window">
         <div class="modal-content">
             <span class="close-modal" onclick="closePolicyModal()">&times;</span>
@@ -83,7 +85,6 @@
                 <div class="footer-col">
                     <h4>روابط هامة</h4>
                     <ul>
-                        <!-- روابط الصفحات الجديدة المستقلة -->
                         <li><a href="pages/terms.html">الشروط والأحكام</a></li>
                         <li><a href="pages/privacy.html">سياسة الخصوصية</a></li>
                         <li><a href="pages/returns.html">سياسة الاسترجاع</a></li>
