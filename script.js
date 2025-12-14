@@ -1,35 +1,40 @@
+إليك ملف script.js الكامل والمعدل ليشمل جميع الميزات التي طلبناها سابقاً (دعم ملف JSON الجديد، الروابط العربية، السلة، التوجيه لصفحة الدفع) بالإضافة إلى ميزة "تحميل المزيد" (Pagination) التي طلبتها الآن، بحيث يظهر 24 منتجاً في كل دفعة.
+
+JavaScript
 // =========================================
-// إعدادات المتجر العامة
+// 1. إعدادات المتجر والمتغيرات العامة
 // =========================================
 const WHATSAPP_NUMBER = "201110760081";
 let allProducts = [];
 let cart = JSON.parse(localStorage.getItem('cart')) || [];
 
+// متغيرات نظام تحميل المنتجات (Pagination)
+let currentIndex = 0;       
+const BATCH_SIZE = 24;      
+
 // =========================================
-// عند تحميل الصفحة
+// 2. عند تحميل الصفحة (Initialization)
 // =========================================
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. تحديث أيقونة السلة فوراً
+    // تحديث أيقونة السلة فوراً
     updateCartUI();
 
-    // 2. التحقق: هل نحن في صفحة التشيك أوت؟ (لمنع تشغيل كود المنتجات هناك)
+    // التحقق: هل نحن في صفحة التشيك أوت؟
     if (document.getElementById('checkout-items')) {
-        // نحن في صفحة checkout.html
         loadCheckoutItems(); 
     } 
-    // 3. هل نحن في الصفحة الرئيسية أو صفحة المنتج؟
+    // هل نحن في الصفحة الرئيسية أو صفحة المنتج؟
     else if (document.getElementById('app-content')) {
         fetchProducts();
     }
 });
 
 // =========================================
-// جلب وعرض المنتجات
+// 3. جلب البيانات والتوجيه (Routing)
 // =========================================
 async function fetchProducts() {
     try {
-        // جلب البيانات من ملف JSON
-        const response = await fetch('products.json');
+        const response = await fetch('products.json'); // تأكد أن المسار صحيح
         allProducts = await response.json();
         
         // التحقق من الرابط: هل هو صفحة منتج أم رئيسية؟
@@ -43,18 +48,21 @@ async function fetchProducts() {
         }
     } catch (error) {
         console.error("Error loading products:", error);
-        // محاولة إيجاد العنصر قبل الكتابة فيه لتجنب الأخطاء في الصفحات الفرعية
         const app = document.getElementById('app-content');
         if(app) app.innerHTML = '<p class="text-center" style="padding:50px">جاري تحميل المنتجات...</p>';
     }
 }
 
-// دالة مساعدة: تحديد السعر (عادي أو مخفض)
+// =========================================
+// 4. دوال مساعدة (Helpers)
+// =========================================
+
+// تحديد السعر (عادي أو مخفض)
 function getProductPrice(product) {
     return product['sale price'] ? product['sale price'] : product.price;
 }
 
-// دالة مساعدة: تصميم HTML للسعر
+// تصميم HTML للسعر
 function renderPriceHTML(product) {
     const currentPrice = getProductPrice(product);
     if (product['sale price'] && product['sale price'] < product.price) {
@@ -69,20 +77,49 @@ function renderPriceHTML(product) {
     }
 }
 
-// عرض الصفحة الرئيسية (Grid)
+// =========================================
+// 5. عرض الصفحة الرئيسية (مع ميزة تحميل المزيد)
+// =========================================
 function renderHomePage() {
     const app = document.getElementById('app-content');
     if (!app) return;
 
-    let html = `
+    // تصفير العداد عند العودة للرئيسية
+    currentIndex = 0;
+
+    // بناء الهيكل الأساسي (الهيرو + حاوية المنتجات + زر التحميل)
+    app.innerHTML = `
         <div class="hero-banner" style="background: linear-gradient(135deg, var(--uae-green), #000); color: white; padding: 40px 20px; border-radius: 8px; margin-top: 20px; text-align: center; margin-bottom:40px;">
             <h1 style="margin-bottom:10px">عروض مخزون الإمارات</h1>
             <p>أفضل المنتجات - شحن سريع - دفع عند الاستلام</p>
         </div>
-        <div class="products-grid">
+
+        <div class="products-grid" id="products-grid-container">
+            <!-- المنتجات ستظهر هنا تدريجياً -->
+        </div>
+
+        <div class="load-more-container" style="text-align: center; margin: 40px 0;">
+            <button id="load-more-btn" class="btn-load-more" onclick="loadNextBatch()" style="background: transparent; color: #000; border: 2px solid #000; padding: 10px 30px; border-radius: 50px; cursor: pointer; font-weight: bold;">
+                عرض المزيد من المنتجات
+            </button>
+        </div>
     `;
 
-    allProducts.forEach(product => {
+    // تحميل الدفعة الأولى فوراً
+    loadNextBatch();
+}
+
+// دالة تحميل الدفعة التالية
+function loadNextBatch() {
+    const container = document.getElementById('products-grid-container');
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    
+    // اقتطاع جزء من المصفوفة بناءً على العداد الحالي
+    const nextProducts = allProducts.slice(currentIndex, currentIndex + BATCH_SIZE);
+    
+    let htmlBatch = '';
+
+    nextProducts.forEach(product => {
         const slug = encodeURIComponent(product.title.replace(/\s+/g, '-'));
         const imageSrc = product['image link'];
         
@@ -93,8 +130,9 @@ function renderHomePage() {
             discountBadge = `<span style="position:absolute; top:10px; right:10px; background:var(--uae-red); color:#fff; padding:3px 10px; border-radius:4px; font-size:12px; font-weight:bold; z-index:2">خصم ${saved}%</span>`;
         }
 
-        html += `
-            <div class="product-card">
+        // إضافة كلاس fade-in لتأثير الظهور
+        htmlBatch += `
+            <div class="product-card fade-in" style="animation: fadeIn 0.5s ease forwards;">
                 ${discountBadge}
                 <div class="product-img-wrapper">
                     <a href="?product=${slug}">
@@ -111,11 +149,22 @@ function renderHomePage() {
             </div>
         `;
     });
-    html += `</div>`;
-    app.innerHTML = html;
+
+    // إضافة المنتجات الجديدة دون حذف القديمة
+    container.insertAdjacentHTML('beforeend', htmlBatch);
+
+    // تحديث العداد
+    currentIndex += BATCH_SIZE;
+
+    // إخفاء الزر إذا انتهت المنتجات
+    if (currentIndex >= allProducts.length) {
+        if(loadMoreBtn) loadMoreBtn.style.display = 'none';
+    }
 }
 
-// عرض صفحة المنتج الفردي
+// =========================================
+// 6. عرض صفحة المنتج الفردي
+// =========================================
 function renderSingleProduct(slug) {
     const productName = decodeURIComponent(slug).replace(/-/g, ' ');
     const product = allProducts.find(p => p.title === productName) || allProducts.find(p => p.title.includes(productName));
@@ -183,7 +232,7 @@ function renderSingleProduct(slug) {
 }
 
 // =========================================
-// منطق السلة (Cart Logic)
+// 7. منطق السلة (Cart Logic)
 // =========================================
 function addToCart(productId) {
     const product = allProducts.find(p => p.id === productId);
@@ -265,7 +314,7 @@ function toggleCart(forceOpen = false) {
 }
 
 // =========================================
-// الانتقال لصفحة الدفع
+// 8. منطق صفحة الدفع (Checkout)
 // =========================================
 function checkoutPage() {
     if (cart.length === 0) {
@@ -276,7 +325,45 @@ function checkoutPage() {
     window.location.href = 'pages/checkout.html';
 }
 
-// دالة الطلب المباشر للمنتج الفردي
+// دالة تحميل عناصر السلة في صفحة الدفع (مهمة لصفحة checkout.html)
+function loadCheckoutItems() {
+    const container = document.getElementById('checkout-items');
+    // إذا لم نجد الكونتينر، نتوقف (لأننا لسنا في صفحة الدفع)
+    if (!container) return; 
+
+    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    if(cart.length === 0) {
+        window.location.href = '../index.html'; // العودة للرئيسية إذا السلة فارغة
+        return;
+    }
+
+    container.innerHTML = '';
+    let total = 0;
+    
+    cart.forEach(item => {
+        total += item.price * item.qty;
+        container.innerHTML += `
+            <div class="summary-item">
+                <img src="${item.image}" alt="${item.title}">
+                <div>
+                    <h4>${item.title}</h4>
+                    <p>${item.qty} x ${item.price} درهم</p>
+                </div>
+                <div style="margin-right: auto;">${item.qty * item.price}</div>
+            </div>
+        `;
+    });
+
+    // تحديث الإجماليات إذا وجدت العناصر
+    const subTotalEl = document.getElementById('sub-total');
+    const finalTotalEl = document.getElementById('final-total');
+    if(subTotalEl) subTotalEl.innerText = total + ' درهم';
+    if(finalTotalEl) finalTotalEl.innerText = total + ' درهم';
+}
+
+// =========================================
+// 9. التواصل والطلب (WhatsApp)
+// =========================================
 function directOrder(title, price) {
     let message = `*استفسار عن منتج (مخزون الإمارات)*%0a`;
     message += `---------------------------%0a`;
