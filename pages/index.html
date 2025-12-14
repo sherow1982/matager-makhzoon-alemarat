@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>متجر مخزون الإمارات | تسوق بذكاء</title>
+    <meta name="description" content="أفضل متجر إلكتروني في الإمارات. دفع عند الاستلام، شحن مجاني وسريع.">
+
+    <!-- 1. تحسين سرعة الاتصال بسيرفرات جوجل -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- 2. تحميل خط كايرو بشكل محسن -->
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- 3. تحميل أيقونات FontAwesome بدون تعطيل الصفحة -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" media="print" onload="this.media='all'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"></noscript>
+
+    <!-- 4. ملف الاستايل الأساسي -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 5. ملف الجافاسكربت (يعمل في الخلفية لزيادة السرعة) -->
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <!-- الشريط العلوي الاحترافي -->
+    <div class="top-bar">
+        <div class="container flex-between">
+            <!-- روابط التواصل السريع -->
+            <div class="contact-info">
+                <a href="https://wa.me/201110760081" target="_blank" class="top-link">
+                    <i class="fab fa-whatsapp"></i> 201110760081+
+                </a>
+                <span class="sep">|</span>
+                <a href="mailto:info@arabsad.com" class="top-link">
+                    <i class="fas fa-envelope"></i> info@arabsad.com
+                </a>
+            </div>
+            
+            <!-- روابط الصفحات الهامة -->
+            <div class="shipping-note">
+                <a href="pages/shipping.html" class="top-link">الشحن المجاني</a>
+                <span class="sep">|</span>
+                <a href="pages/returns.html" class="top-link">الاسترجاع</a>
+                <span class="sep">|</span>
+                <a href="pages/terms.html" class="top-link">الشروط</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- الهيدر الرئيسي -->
+    <header class="main-header">
+        <div class="container flex-between">
+            <!-- الشعار -->
+            <a href="index.html" class="logo">
+                <span class="uae-red">مخزون</span> <span class="uae-green">الإمارات</span>
+            </a>
+            
+            <!-- مربع البحث -->
+            <div class="search-box">
+                <input type="text" id="search-input" placeholder="ابحث عن منتج (مثال: عطر، ساعة)..." onkeypress="handleEnter(event)">
+                <button onclick="searchProducts()"><i class="fas fa-search"></i></button>
+            </div>
+
+            <!-- أيقونة السلة -->
+            <div class="header-icons">
+                <div class="cart-icon" onclick="toggleCart()">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-count">0</span>
+                    <span class="cart-text">السلة</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- منطقة المحتوى المتغيرة (يتم تحميل المنتجات هنا) -->
+    <main id="app-content" class="container"></main>
+
+    <!-- القائمة الجانبية للسلة -->
+    <div class="cart-sidebar" id="cart-sidebar">
+        <div class="cart-header">
+            <h3><i class="fas fa-shopping-cart"></i> سلة المشتريات</h3>
+            <span class="close-cart" onclick="toggleCart()">&times;</span>
+        </div>
+        <div class="cart-items" id="cart-items">
+            <!-- يتم تعبئة المنتجات هنا بالجافاسكربت -->
+        </div>
+        <div class="cart-footer">
+            <div class="total-row-cart">
+                <span>المجموع:</span>
+                <span id="cart-total" class="uae-green">0.00 درهم</span>
+            </div>
+            <p style="font-size:12px; color:#777; margin-bottom:10px; text-align:center;">الشحن والضريبة يحسبان عند إتمام الطلب</p>
+            <button class="checkout-btn" onclick="checkoutPage()">
+                <i class="fas fa-check-circle"></i> إتمام الطلب
+            </button>
+        </div>
+    </div>
+
+    <!-- طبقة التعتيم الخلفية -->
+    <div class="overlay" id="overlay" onclick="toggleCart()"></div>
+
+    <!-- النافذة المنبثقة للسياسات السريعة (Modal) -->
+    <div id="policyModal" class="modal-window">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closePolicyModal()">&times;</span>
+            <div class="modal-header">
+                <h3><i class="fas fa-shield-alt"></i> ضمان مخزون الإمارات</h3>
+            </div>
+            <div class="modal-body">
+                <div class="policy-item">
+                    <h4><i class="fas fa-truck"></i> الشحن والتوصيل</h4>
+                    <p>شحن سريع خلال 1-3 أيام عمل لجميع الإمارات.</p>
+                </div>
+                <div class="policy-item">
+                    <h4><i class="fas fa-undo"></i> سياسة الاسترجاع</h4>
+                    <p>ضمان استرجاع لمدة 14 يوم (تطبق الشروط والأحكام).</p>
+                </div>
+                <div class="alert-item">
+                    <h4><i class="fas fa-exclamation-triangle"></i> تنويه</h4>
+                    <p>لا يتم استرجاع العطور ومنتجات التجميل المفتوحة.</p>
+                </div>
+                <a href="pages/shipping.html" class="btn-full-policy">عرض تفاصيل الشحن المجاني</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- الفوتر الثابت -->
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <!-- العمود الأول: عن المتجر -->
+                <div class="footer-col">
+                    <h4>مخزون الإمارات</h4>
+                    <p>وجهتك الأولى للتسوق الإلكتروني في الإمارات. نوفر لك منتجات أصلية بجودة عالية وأسعار تنافسية مع خدمة دفع عند الاستلام.</p>
+                </div>
+
+                <!-- العمود الثاني: روابط قانونية -->
+                <div class="footer-col">
+                    <h4>معلومات قانونية</h4>
+                    <ul>
+                        <li><a href="pages/shipping.html">سياسة الشحن المجاني</a></li>
+                        <li><a href="pages/returns.html">سياسة الاسترجاع والاستبدال</a></li>
+                        <li><a href="pages/terms.html">الشروط والأحكام</a></li>
+                        <li><a href="pages/privacy.html">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+
+                <!-- العمود الثالث: تواصل معنا -->
+                <div class="footer-col">
+                    <h4>تواصل معنا</h4>
+                    <ul class="contact-list">
+                        <li style="margin-bottom: 10px;">
+                            <a href="https://wa.me/201110760081" target="_blank" style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fab fa-whatsapp" style="color: #25D366; font-size: 18px;"></i>
+                                <span>201110760081+</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <a href="mailto:info@arabsad.com" style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-envelope" style="color: #ccc; font-size: 18px;"></i>
+                                <span>info@arabsad.com</span>
+                            </a>
+                        </li>
+                        <li style="margin-bottom: 10px;">
+                            <a href="mailto:sherow1982@gmail.com" style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-envelope" style="color: #ccc; font-size: 18px;"></i>
+                                <span>sherow1982@gmail.com</span>
+                            </a>
+                        </li>
+                        <li style="margin-top: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <i class="fas fa-map-marker-alt" style="color: var(--uae-red);"></i>
+                                <span>دبي، الإمارات العربية المتحدة</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>جميع الحقوق محفوظة © 2025 متجر مخزون الإمارات</p>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
