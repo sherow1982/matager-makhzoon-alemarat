@@ -7,18 +7,11 @@ let cart = JSON.parse(localStorage.getItem('cart')) || [];
 let currentIndex = 0;       
 const BATCH_SIZE = 24;      
 
-// =========================================
-// 2. التحميل الأولي
-// =========================================
 document.addEventListener('DOMContentLoaded', () => {
     updateCartUI();
-    
-    // تحديد المسار الصحيح لملف المنتجات بناءً على مكان الصفحة
-    // إذا كنا داخل مجلد pages، نعود للخلف خطوة، وإلا نقرأ مباشرة
     const isInsidePages = window.location.pathname.includes('/pages/');
     const jsonPath = isInsidePages ? '../products.json' : 'products.json';
 
-    // تشغيل المنطق المناسب للصفحة
     if (document.getElementById('checkout-items')) {
         loadCheckoutItems(); 
     } else if (document.getElementById('app-content')) {
@@ -26,9 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// =========================================
-// 3. جلب البيانات والتوجيه
-// =========================================
 async function fetchProducts(path) {
     try {
         const response = await fetch(path);
@@ -44,7 +34,6 @@ async function fetchProducts(path) {
         }
     } catch (error) {
         console.error("Error loading products:", error);
-        // لا نعرض رسالة خطأ في الصفحات القانونية لأنها لا تحتاج المنتجات
         const app = document.getElementById('app-content');
         if(app && !window.location.pathname.includes('legal')) {
              app.innerHTML = '<p class="text-center" style="padding:50px">جاري تحميل المنتجات...</p>';
@@ -52,7 +41,57 @@ async function fetchProducts(path) {
     }
 }
 
-// دوال مساعدة
+// =========================================
+// 2. وظائف البحث (الجديدة)
+// =========================================
+function searchProducts() {
+    const searchInput = document.getElementById('search-input');
+    if (!searchInput) return;
+
+    const query = searchInput.value.toLowerCase().trim();
+    const app = document.getElementById('app-content');
+
+    // إذا كان البحث فارغاً، نعود للرئيسية
+    if (!query) {
+        renderHomePage();
+        return;
+    }
+
+    // تصفية المنتجات
+    const filteredProducts = allProducts.filter(product => 
+        product.title.toLowerCase().includes(query)
+    );
+
+    // عرض النتائج
+    app.innerHTML = `
+        <div class="search-header" style="text-align:center; margin:30px 0;">
+            <h2>نتائج البحث عن: "${searchInput.value}"</h2>
+            <p style="color:#777">${filteredProducts.length} منتج مطابق</p>
+            <button onclick="clearSearch()" class="btn-add" style="width:auto; display:inline-block; background:#555; margin-top:10px; padding:8px 20px">عودة للرئيسية</button>
+        </div>
+        <div class="products-grid">
+            ${filteredProducts.map(product => generateProductCardHTML(product)).join('')}
+        </div>
+    `;
+
+    if (filteredProducts.length === 0) {
+        app.innerHTML += '<div style="text-align:center; margin-bottom:50px; color:#999"><i class="fas fa-search" style="font-size:50px; margin-bottom:20px; display:block"></i>لا توجد منتجات تطابق بحثك</div>';
+    }
+}
+
+function clearSearch() {
+    const searchInput = document.getElementById('search-input');
+    if(searchInput) searchInput.value = '';
+    renderHomePage();
+}
+
+function handleEnter(e) {
+    if (e.key === 'Enter') searchProducts();
+}
+
+// =========================================
+// 3. دوال مساعدة وتوليد HTML
+// =========================================
 function getProductPrice(product) {
     return product['sale price'] ? product['sale price'] : product.price;
 }
@@ -60,27 +99,39 @@ function getProductPrice(product) {
 function renderPriceHTML(product) {
     const currentPrice = getProductPrice(product);
     if (product['sale price'] && product['sale price'] < product.price) {
-        return `<div class="price-box">
-                    <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">${product.price} AED</span> 
-                    <span style="color: var(--uae-red); font-weight: bold; font-size: 1.1em; margin-right:5px">${currentPrice} AED</span>
-                </div>`;
-    } else {
-        return `<span style="color: var(--uae-green); font-weight: bold; font-size: 1.1em;">${currentPrice} AED</span>`;
+        return `<div class="price-box"><span style="text-decoration: line-through; color: #999; font-size: 0.9em;">${product.price} AED</span> <span style="color: var(--uae-red); font-weight: bold; font-size: 1.1em; margin-right:5px">${currentPrice} AED</span></div>`;
     }
+    return `<span style="color: var(--uae-green); font-weight: bold; font-size: 1.1em;">${currentPrice} AED</span>`;
 }
 
-// === دالة توليد الوصف الاحترافي ===
 function getProductDescription(product) {
-    // 1. إذا كان الوصف موجوداً في الجيسون وليس فارغاً، استخدمه
-    if (product.description && product.description.trim().length > 0) {
-        return product.description;
+    if (product.description && product.description.trim().length > 0) return product.description;
+    return `<p>نقدم لك <strong>${product.title}</strong>، الخيار الأمثل لمن يبحث عن التميز والجودة العالية. تم اختيار هذا المنتج بعناية في <strong>مخزون الإمارات</strong> ليوفر لك تجربة استخدام عملية ومريحة.</p>`;
+}
+
+// دالة توليد بطاقة المنتج (للاستخدام في البحث والرئيسية)
+function generateProductCardHTML(product) {
+    const slug = encodeURIComponent(product.title.replace(/\s+/g, '-'));
+    const imageSrc = product['image link'];
+    
+    let discountBadge = '';
+    if (product['sale price'] && product['sale price'] < product.price) {
+        const saved = Math.round(((product.price - product['sale price']) / product.price) * 100);
+        discountBadge = `<span style="position:absolute; top:10px; right:10px; background:var(--uae-red); color:#fff; padding:3px 10px; border-radius:4px; font-size:12px; font-weight:bold; z-index:2">خصم ${saved}%</span>`;
     }
 
-    // 2. إذا لم يوجد، قم بتوليد وصف احترافي بناءً على الاسم
     return `
-        <p>نقدم لك <strong>${product.title}</strong>، الخيار الأمثل لمن يبحث عن التميز والجودة العالية.</p>
-        <p>تم اختيار هذا المنتج بعناية في <strong>مخزون الإمارات</strong> ليوفر لك تجربة استخدام عملية ومريحة. يتميز بخامات عالية الجودة وتصميم عصري يلبي كافة احتياجاتك اليومية.</p>
-        <p>احصل عليه الآن بسعر منافس واستفد من خدمة الشحن السريع والدفع عند الاستلام.</p>
+        <div class="product-card fade-in">
+            ${discountBadge}
+            <div class="product-img-wrapper">
+                <a href="?product=${slug}"><img src="${imageSrc}" alt="${product.title}" loading="lazy"></a>
+            </div>
+            <div class="product-info">
+                <a href="?product=${slug}" class="product-title">${product.title}</a>
+                ${renderPriceHTML(product)}
+                <button class="btn-add" onclick="addToCart(${product.id})"><i class="fas fa-shopping-bag"></i> أضف للسلة</button>
+            </div>
+        </div>
     `;
 }
 
@@ -112,31 +163,8 @@ function loadNextBatch() {
 
     const nextProducts = allProducts.slice(currentIndex, currentIndex + BATCH_SIZE);
     
-    let htmlBatch = '';
-    nextProducts.forEach(product => {
-        const slug = encodeURIComponent(product.title.replace(/\s+/g, '-'));
-        const imageSrc = product['image link'];
-        
-        let discountBadge = '';
-        if (product['sale price'] && product['sale price'] < product.price) {
-            const saved = Math.round(((product.price - product['sale price']) / product.price) * 100);
-            discountBadge = `<span style="position:absolute; top:10px; right:10px; background:var(--uae-red); color:#fff; padding:3px 10px; border-radius:4px; font-size:12px; font-weight:bold; z-index:2">خصم ${saved}%</span>`;
-        }
-
-        htmlBatch += `
-            <div class="product-card fade-in">
-                ${discountBadge}
-                <div class="product-img-wrapper">
-                    <a href="?product=${slug}"><img src="${imageSrc}" alt="${product.title}" loading="lazy"></a>
-                </div>
-                <div class="product-info">
-                    <a href="?product=${slug}" class="product-title">${product.title}</a>
-                    ${renderPriceHTML(product)}
-                    <button class="btn-add" onclick="addToCart(${product.id})"><i class="fas fa-shopping-bag"></i> أضف للسلة</button>
-                </div>
-            </div>
-        `;
-    });
+    // استخدام دالة التوليد الموحدة
+    const htmlBatch = nextProducts.map(product => generateProductCardHTML(product)).join('');
 
     container.insertAdjacentHTML('beforeend', htmlBatch);
     currentIndex += BATCH_SIZE;
@@ -160,7 +188,6 @@ function renderSingleProduct(slug) {
     const currentPrice = getProductPrice(product);
     const imageSrc = product['image link'];
     const additionalImage = product['additional image link'];
-    // استدعاء دالة الوصف الجديدة
     const descriptionHTML = getProductDescription(product);
 
     let galleryHTML = `<img id="main-img" src="${imageSrc}" alt="${product.title}">`;
@@ -181,7 +208,6 @@ function renderSingleProduct(slug) {
                 <h1>${product.title}</h1>
                 <div style="margin-bottom:20px">${renderPriceHTML(product)}</div>
                 
-                <!-- قسم الوصف -->
                 <div class="product-description" style="margin-bottom:25px; color:#555; line-height:1.8; font-size:15px;">
                     ${descriptionHTML}
                 </div>
@@ -210,7 +236,7 @@ function renderSingleProduct(slug) {
 }
 
 // =========================================
-// 6. التحكم في النافذة المنبثقة
+// 6. التحكم في النوافذ والسلة
 // =========================================
 function openPolicyModal() {
     const modal = document.getElementById('policyModal');
@@ -222,44 +248,32 @@ function closePolicyModal() {
 }
 window.onclick = function(event) {
     const modal = document.getElementById('policyModal');
-    if (event.target == modal) {
-        modal.style.display = "none";
-    }
+    if (event.target == modal) modal.style.display = "none";
 }
 
-// =========================================
-// 7. السلة والدفع
-// =========================================
 function addToCart(productId) {
     const product = allProducts.find(p => p.id === productId);
     const existingItem = cart.find(item => item.id === productId);
     if (existingItem) existingItem.qty++;
-    else {
-        cart.push({ id: product.id, title: product.title, image: product['image link'], price: getProductPrice(product), qty: 1 });
-    }
+    else cart.push({ id: product.id, title: product.title, image: product['image link'], price: getProductPrice(product), qty: 1 });
     saveCart();
     toggleCart(true);
 }
-
 function removeFromCart(productId) {
     cart = cart.filter(item => item.id !== productId);
     saveCart();
 }
-
 function saveCart() {
     localStorage.setItem('cart', JSON.stringify(cart));
     updateCartUI();
     if(document.getElementById('checkout-items')) loadCheckoutItems();
 }
-
 function updateCartUI() {
     const cartCount = document.getElementById('cart-count');
     const cartItemsContainer = document.getElementById('cart-items');
     const cartTotal = document.getElementById('cart-total');
     
-    if(cartCount) {
-        cartCount.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
-    }
+    if(cartCount) cartCount.innerText = cart.reduce((sum, item) => sum + item.qty, 0);
     
     if(cartItemsContainer && cartTotal) {
         cartItemsContainer.innerHTML = '';
@@ -267,8 +281,8 @@ function updateCartUI() {
         cart.forEach(item => {
             totalAmount += item.price * item.qty;
             cartItemsContainer.innerHTML += `
-                <div class="cart-item">
-                    <img src="${item.image}" alt="${item.title}">
+                <div class="cart-item" style="display:flex; gap:10px; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px">
+                    <img src="${item.image}" style="width:60px; height:60px; object-fit:cover; border-radius:4px">
                     <div style="flex:1">
                         <h5 style="font-size:13px; margin-bottom:5px">${item.title}</h5>
                         <div style="display:flex; justify-content:space-between">
@@ -281,7 +295,6 @@ function updateCartUI() {
         cartTotal.innerText = totalAmount.toFixed(2) + ' درهم';
     }
 }
-
 function toggleCart(forceOpen = false) {
     const sidebar = document.getElementById('cart-sidebar');
     const overlay = document.getElementById('overlay');
@@ -289,41 +302,31 @@ function toggleCart(forceOpen = false) {
     if (forceOpen) { sidebar.classList.add('active'); overlay.classList.add('active'); }
     else { sidebar.classList.toggle('active'); overlay.classList.toggle('active'); }
 }
-
 function checkoutPage() {
     if (cart.length === 0) { alert("السلة فارغة!"); return; }
-    // التعامل مع المسارات سواء كنا في الرئيسية أو في صفحة فرعية
-    if (window.location.pathname.includes('/pages/')) {
-        window.location.href = 'checkout.html';
-    } else {
-        window.location.href = 'pages/checkout.html';
-    }
+    if (window.location.pathname.includes('/pages/')) window.location.href = 'checkout.html';
+    else window.location.href = 'pages/checkout.html';
 }
-
 function loadCheckoutItems() {
     const container = document.getElementById('checkout-items');
     if (!container) return; 
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
-    // العودة للرئيسية إذا السلة فارغة
     if(cart.length === 0) { 
         if(window.location.pathname.includes('/pages/')) window.location.href = '../index.html';
         else window.location.href = 'index.html';
         return; 
     }
-    
     container.innerHTML = '';
     let total = 0;
     cart.forEach(item => {
         total += item.price * item.qty;
         container.innerHTML += `<div class="summary-item"><div><img src="${item.image}" alt="${item.title}"></div><div><h4>${item.title}</h4><span>${item.qty} x ${item.price}</span></div><div style="margin-right:auto">${item.qty * item.price}</div></div>`;
     });
-    
     const sub = document.getElementById('sub-total');
     const final = document.getElementById('final-total');
     if(sub) sub.innerText = total + ' درهم';
     if(final) final.innerText = total + ' درهم';
 }
-
 function directOrder(title, price) {
     let msg = `*استفسار عن منتج*%0a🛍️ ${title}%0a💰 ${price} درهم%0aهل متوفر؟`;
     window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${msg}`, '_blank');
