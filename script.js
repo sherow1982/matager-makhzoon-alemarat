@@ -349,8 +349,8 @@ function renderSingleProduct(slug) {
         ? `<span class="meta-tag in-stock"><i class="fas fa-check-circle"></i> متوفر في المخزون</span>`
         : `<span class="meta-tag out-stock"><i class="fas fa-times-circle"></i> غير متوفر حالياً</span>`;
 
-    const conditionHTML = `<span class="meta-tag"><i class="fas fa-box-open"></i> حالة المنتج: ${product.condition === 'new' ? 'جديد أصلي' : 'مستعمل'}</span>`;
-    const skuHTML = `<span class="meta-tag"><i class="fas fa-barcode"></i> كود: ${product.id}</span>`;
+    const conditionHTML = `<span class="meta-tag"><i class="fas fa-box-open"></i> حالة المنتج: ${product.condition === 'new' ? 'جديد' : 'مستعمل'}</span>`;
+    const skuHTML = `<span class="meta-tag"><i class="fas fa-barcode"></i> كود: ${product.sku || product.id}</span>`;
 
     let galleryHTML = `<img id="main-img" src="${imageSrc}" alt="${product.title}" 
                             style="width:100%; border-radius:8px;"
