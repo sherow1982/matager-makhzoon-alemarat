@@ -269,7 +269,7 @@ function loadNextBatchFiltered() {
     if (batch.length === 0 && currentIndex === 0) return; // Empty handled in render
 
     batch.forEach(product => {
-        container.innerHTML += createProductCard(product);
+        container.innerHTML += generateProductCardHTML(product);
     });
 
     currentIndex += ITEMS_PER_PAGE;
