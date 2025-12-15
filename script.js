@@ -69,11 +69,11 @@ function renderPriceHTML(product) {
     const currentPrice = getProductPrice(product);
     if (product['sale price'] && product['sale price'] < product.price) {
         return `<div class="price-box">
-                    <span style="text-decoration: line-through; color: #999; font-size: 0.9em;">${product.price} AED</span> 
-                    <span style="color: var(--uae-red); font-weight: bold; font-size: 1.1em; margin-right:5px">${currentPrice} AED</span>
+                    <span class="text-through">${product.price} AED</span> 
+                    <span class="price-sale">${currentPrice} AED</span>
                 </div>`;
     } else {
-        return `<span style="color: var(--uae-green); font-weight: bold; font-size: 1.1em;">${currentPrice} AED</span>`;
+        return `<span class="price-normal">${currentPrice} AED</span>`;
     }
 }
 
@@ -96,7 +96,7 @@ function generateProductCardHTML(product) {
     let discountBadge = '';
     if (product['sale price'] && product['sale price'] < product.price) {
         const saved = Math.round(((product.price - product['sale price']) / product.price) * 100);
-        discountBadge = `<span style="position:absolute; top:10px; right:10px; background:var(--uae-red); color:#fff; padding:3px 10px; border-radius:4px; font-size:12px; font-weight:bold; z-index:2">خصم ${saved}%</span>`;
+        discountBadge = `<span class="discount-badge">خصم ${saved}%</span>`;
     }
     
     return `
@@ -104,7 +104,7 @@ function generateProductCardHTML(product) {
             ${discountBadge}
             <div class="product-img-wrapper">
                 <a href="?product=${slug}">
-                    <img src="${imageSrc}" alt="${product.title}" loading="lazy" style="width:100%; height:100%; object-fit:contain;" onerror="this.onerror=null; this.src='images/icon-192.png';">
+                    <img src="${imageSrc}" alt="${product.title}" loading="lazy" class="product-img" onerror="this.onerror=null; this.src='images/icon-192.png';">
                 </a>
             </div>
             <div class="product-info">
@@ -408,10 +408,51 @@ function searchProducts() {
             ${filteredProducts.map(product => generateProductCardHTML(product)).join('')}
         </div>
     `;
-    if (filteredProducts.length === 0) { app.innerHTML += '<div style="text-align:center; margin-bottom:50px; color:#999">لا توجد منتجات.</div>'; }
+    if (filteredProducts.length === 0) { app.innerHTML += '<div class="no-products">لا توجد منتجات.</div>'; }
 }
 
 function handleEnter(e) { if (e.key === 'Enter') searchProducts(); }
+
+// =========================================
+// 8.5 اوتيلكماليت البحث (Search Autocomplete)
+// =========================================
+function showSuggestions(input) {
+    const query = input.value.toLowerCase().trim();
+    const suggestionsBox = document.getElementById('search-suggestions');
+    if (!suggestionsBox) return;
+
+    if (query.length < 2) {
+        suggestionsBox.classList.remove('active');
+        return;
+    }
+
+    const matches = allProducts.filter(p => p.title.toLowerCase().includes(query)).slice(0, 5);
+    
+    if (matches.length > 0) {
+        suggestionsBox.innerHTML = matches.map(p => {
+            const slug = encodeURIComponent(p.title.replace(/\s+/g, '-'));
+            return `
+            <div class="suggestion-item" onclick="window.location.href='?product=${slug}'">
+                <img src="${p['image link']}" onerror="this.src='images/icon-192.png'">
+                <div class="suggestion-info">
+                    <h5>${p.title}</h5>
+                    <span>${getProductPrice(p)} AED</span>
+                </div>
+            </div>`;
+        }).join('');
+        suggestionsBox.classList.add('active');
+    } else {
+        suggestionsBox.classList.remove('active');
+    }
+}
+
+// إغلاق الاقتراحات عند النقر خارجها
+document.addEventListener('click', (e) => {
+    const suggestionsBox = document.getElementById('search-suggestions');
+    if (suggestionsBox && !e.target.closest('.search-box')) {
+        suggestionsBox.classList.remove('active');
+    }
+});
 
 // =========================================
 // 8. زر البحث العائم (للموبايل)

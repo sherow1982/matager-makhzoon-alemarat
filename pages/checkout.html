@@ -153,10 +153,18 @@
         // دالة خاصة بالصفحة (Process Order)
         function processOrder(e) {
             e.preventDefault();
-            const name = document.getElementById('c_name').value;
-            const phone = document.getElementById('c_phone').value;
+            const name = document.getElementById('c_name').value.trim();
+            const phone = document.getElementById('c_phone').value.trim();
             const city = document.getElementById('c_city').value;
-            const address = document.getElementById('c_address').value;
+            const address = document.getElementById('c_address').value.trim();
+
+            // Validation
+            const phoneRegex = /^05\d{8}$/;
+            if (!phoneRegex.test(phone)) {
+                alert("يرجى إدخال رقم هاتف صحيح يبدأ بـ 05 ويتكون من 10 أرقام.");
+                return;
+            }
+
             let cart = JSON.parse(localStorage.getItem('cart')) || [];
             
             let msg = `*طلب جديد (مخزون الإمارات)*%0a`;

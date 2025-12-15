@@ -102,7 +102,10 @@
             </a>
             
             <div class="search-box">
-                <input type="text" id="search-input" placeholder="ابحث عن منتج (مثال: عطر، ساعة)..." onkeypress="handleEnter(event)">
+                <div class="search-wrapper">
+                    <input type="text" id="search-input" placeholder="ابحث عن منتج (مثال: عطر، ساعة)..." onkeypress="handleEnter(event)" oninput="showSuggestions(this)" autocomplete="off">
+                    <div id="search-suggestions" class="search-suggestions"></div>
+                </div>
                 <button onclick="searchProducts()"><i class="fas fa-search"></i></button>
             </div>
 
@@ -164,6 +167,39 @@
             </div>
         </div>
     </div>
+
+    <!-- آراء العملاء -->
+    <section class="testimonials-section">
+        <div class="container">
+            <h2 class="section-title">ماذا يقول عملاؤنا؟</h2>
+            <div class="testimonials-grid">
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"تجربة تسوق ممتازة، التوصيل كان سريع جداً للمنتج وصلني في يومين بس لأبوظبي. الجودة نفس الصور بالضبط."</p>
+                    <span class="client-name">محمد الحمادي</span>
+                    <span class="client-city">أبوظبي</span>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i>
+                    </div>
+                    <p class="testimonial-text">"أعجبتني خدمة الدفع عند الاستلام، والأغراض وصلت مغلفة زين. شكراً مخزون الإمارات."</p>
+                    <span class="client-name">سارة المري</span>
+                    <span class="client-city">دبي</span>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">
+                        <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p class="testimonial-text">"أسعاركم ممتازة مقارنة بالسوق، وتنوع المنتجات حلو. بالتوفيق لكم."</p>
+                    <span class="client-name">أحمد كتبي</span>
+                    <span class="client-city">الشارقة</span>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- الفوتر -->
     <footer>
