@@ -332,6 +332,26 @@ function renderSingleProduct(slug) {
     const additionalImage = product['additional image link'];
     const descriptionHTML = getProductDescriptionHTML(product);
 
+    // Calculate Savings
+    let discountHTML = '';
+    if (product['sale price'] && product['sale price'] < product.price) {
+        const savedAmount = (product.price - product['sale price']).toFixed(0);
+        const savedPercent = Math.round(((product.price - product['sale price']) / product.price) * 100);
+        discountHTML = `
+            <div class="discount-counter-box">
+                <i class="fas fa-fire-alt"></i> عرض خاص! وفرت ${savedAmount} درهم (${savedPercent}%)
+                <span style="font-size:12px; font-weight:normal; margin-right:auto; color:#777">ينتهي قريباً</span>
+            </div>
+        `;
+    }
+
+    const availabilityHTML = product.availability === 'in_stock' 
+        ? `<span class="meta-tag in-stock"><i class="fas fa-check-circle"></i> متوفر في المخزون</span>`
+        : `<span class="meta-tag out-stock"><i class="fas fa-times-circle"></i> غير متوفر حالياً</span>`;
+
+    const conditionHTML = `<span class="meta-tag"><i class="fas fa-box-open"></i> حالة المنتج: ${product.condition === 'new' ? 'جديد أصلي' : 'مستعمل'}</span>`;
+    const skuHTML = `<span class="meta-tag"><i class="fas fa-barcode"></i> كود: ${product.id}</span>`;
+
     let galleryHTML = `<img id="main-img" src="${imageSrc}" alt="${product.title}" 
                             style="width:100%; border-radius:8px;"
                             onerror="this.onerror=null; this.src='images/icon-192.png';">`;
@@ -351,6 +371,12 @@ function renderSingleProduct(slug) {
             <div class="single-img">${galleryHTML}</div>
             <div class="single-details">
                 <h1>${product.title}</h1>
+                <div class="product-meta-tags">
+                   ${availabilityHTML}
+                   ${conditionHTML}
+                   ${skuHTML}
+                </div>
+                ${discountHTML}
                 <div style="margin-bottom:20px">${renderPriceHTML(product)}</div>
                 <div class="product-description" style="margin-bottom:25px; color:#555; line-height:1.8; font-size:15px;">${descriptionHTML}</div>
                 <div class="buy-actions">

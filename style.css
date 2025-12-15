@@ -347,3 +347,60 @@ footer { background: #1a1a1a; color: #fff; padding: 60px 0 20px; margin-top: 60p
     overflow: hidden;
 }
 
+
+/* =========================================
+   12. Product Meta Details (SKU, Condition, etc.)
+   ========================================= */
+.product-meta-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+    color: #666;
+}
+
+.meta-tag {
+    background: #f8f9fa;
+    padding: 5px 12px;
+    border-radius: 4px;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.meta-tag.in-stock {
+    background: #e6fcf5;
+    color: #0ca678;
+    border-color: #c3fae8;
+}
+
+.meta-tag.out-stock {
+    background: #fff5f5;
+    color: #fa5252;
+    border-color: #ffc9c9;
+}
+
+.discount-counter-box {
+    background: linear-gradient(to left, #fff0f0, #fff);
+    border-right: 4px solid var(--uae-red);
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: #d6336c;
+    font-weight: bold;
+}
+
+.save-badge {
+    background: var(--uae-red);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
