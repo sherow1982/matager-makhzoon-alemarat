@@ -13,11 +13,16 @@ STORE_DESCRIPTION = 'Best deals in UAE for watches and accessories.'
 
 # List of Luxury Brands to Exclude (Case Insensitive)
 # These are the brands that trigger "Counterfeit Goods" violations if prices are too low.
+# List of Luxury Brands to Exclude (Case Insensitive)
 FORBIDDEN_KEYWORDS = [
     "rolex", "bvlgari", "bulgari", "gucci", "louis vuitton", "lv", "chanel", 
     "dior", "cartier", "omega", "breitling", "patek", "audemars", "hublot", 
     "tag heuer", "panerai", "iwc", "richard mille", "versace", "fendi", 
-    "prada", "hermes", "burberry"
+    "prada", "hermes", "burberry", "boucheron",
+    # Arabic Brands
+    "رولكس", "بولغاري", "غوتشي", "لويس فيتون", "شانيل", "ديور", "كارتير", 
+    "اوميغا", "بريتلينغ", "باتيك", "هوبلو", "تاغ هوير", "بانerai", "فيرساتشي", 
+    "فندي", "برادا", "هيرميس", "بربري", "لوي فيتون"
 ]
 
 def load_products():
@@ -27,10 +32,17 @@ def load_products():
 def is_safe_product(product):
     title = product.get('title', '').lower()
     description = product.get('description', '').lower()
+    text = f"{title} {description}"
     
     for brand in FORBIDDEN_KEYWORDS:
-        if brand in title or brand in description:
-            return False
+        # Use regex word boundaries for English keywords to avoid 'silver' matching 'lv'
+        if re.match(r'^[a-z0-9 ]+$', brand): 
+            if re.search(r'\b' + re.escape(brand) + r'\b', text):
+                return False
+        else:
+            # Simple substring match for Arabic (safer due to morphology)
+            if brand in text:
+                return False
     return True
 
 def generate_xml(products):
